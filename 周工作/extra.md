@@ -2,12 +2,12 @@
 + [ ] [Network design: Firewall, IDS/IPS](https://resources.infosecinstitute.com/topic/network-design-firewall-idsips/)
 + [ ] [grpc 源码解读](https://github.com/lubanproj/grpc-read)
 + [ ] [awesome-ml-for-cybersecurity](https://github.com/jivoi/awesome-ml-for-cybersecurity)
-
++ [ ][TCP Fundamentals Part 1 // TCP/IP Explained with Wireshark](https://www.youtube.com/watch?v=xdQ9sgpkrX8)
 
 
 Course
 + [ ] Machine Learning for Cyber Security
-    + [ ] 
+    
 
 
 
