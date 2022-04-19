@@ -1,0 +1,2 @@
+# LXD server for remote access
+By default, the LXD server is not accessible from the network as it only listens on a local Unix socket. You can make LXD available from the network by specifying additional addresses to listen to. This is done with the core.https_address config variable.
