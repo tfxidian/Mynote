@@ -32,16 +32,16 @@ footer: '@ftang'
 - 在另一篇[论文]()中，我们证明了1型虚拟机监控程序的IP时间戳模式也显示了真实机器和虚拟机之间的明显差异
 ---
 ## 相关研究
-![width:1000px](./FILES/test.md/7d96a764.png)
-
-![width:1000px](./FILES/test.md/9eea1d55.png)
+![width:800px](./FILES/test.md/7d96a764.png)
+![width:800px](./FILES/test.md/9eea1d55.png)
+我们已经证明，来自虚拟机所在主机的数据包的IP时间戳差异大于真实机器。VM操作有时暂停，以便完成其他来宾操作
 
 ---
 
 ## 背景知识
 
 
-![width:1000px](./FILES/test.md/81fd8672.png)
+![width:800px](./FILES/test.md/81fd8672.png)
 - IP被设计为使用IP选项支持可扩展性  
 - IP时间戳选项是存储在IP头中的可变长度数据，允许发送者请求任何通过指定IP地址来处理数据包的目标计算机的时间戳值
 
@@ -61,8 +61,119 @@ footer: '@ftang'
 ---
 ## 远程检测方法及对策
 
+ 
+
+
+利用VM回复包中的IP时间戳信息差异，可以区分vm和真实机器的IP时间戳模式
+
+![bg right:50% w:650](./FILES/test.md/bde71f88.png)
+
+---
+## 远程检测方法及对策
+
 
 #### 总体思路
-利用VM回复包中的IP时间戳信息
 
-![width:700px](./FILES/test.md/bde71f88.png)
+- 根据实验中发现的时间戳模式差异绘制分布图
+- 然后，我们使用我们的延迟修改技术设计了一个解决方案，其中使真正的机器显示与VM相同的IP时间戳应答模式
+    - 当带有IP时间戳选项的数据包到达真实机器时，它们在被转发到操作系统进行处理之前会使用对策延迟
+    - 解决了利用时间戳进行虚拟机攻击的可能性 
+
+
+---
+## 测试方法
+- 所有主要的商业hypervisor产品，都被实现来承载VM测试机器
+- 在报头中发送开启了IP时间戳选项的请求包
+- 通过执行为本实验开发的定制脚本，从测试客户端机器发送数据包。
+- 记录并编译来自目标机的应答包中的时间戳信息
+- IP时间戳以十进制单位分析到最近的毫秒
+![bg right:50% w:650](./FILES/test.md/bb76584a.png)
+
+---
+## 过程分析
+
+- 通过执行为本实验开发的定制脚本，从测试客户端机器发送数据包
+- 只有在测量机收到前一个包请求的回复后，客户端测试机的下一个请求包才被发送到目标主机
+- 每个目标操作系统都添加了自己的时间戳，并且数据包中的时间戳在到达客户机之前不会受到网络的影响
+- 分析来自测量目标机的IP时间戳信息，绘制分布图，观察目标客户的时间戳差异
+
+---
+## 数据分析
+![bg right:50% w:650](./FILES/test.md/f242692d.png)
+
+
+我们对收集到的数据进行分析，了解目标主机时间戳行为的差异。时间戳是从测试客户端机器中的每个目标主机的应答包中提取的。
+- 如图所示的顺序从发送的第一个包n开始，一直到第20个包n + 19。
+- 对于真正的机器，前三个应答报文的时间戳是相同的，之后的五个应答报文的时间戳也是相同的。
+
+---
+## 数据分析
+![bg right:50% w:700](./FILES/test.md/62ef9eed.png)
+右图在来自目标主机的应答包的序列中，相同的时间戳被标记了多少次。
+- 真实机器的相同时间戳的平均重复次数几乎为4.50次，而VM目标主机的平均重复值更小
+- 不同的虚拟机监控程序技术具有不同的时间戳行为模式
+
+---
+
+## 数据分析
+
+![width:800px](./FILES/test.md/b667c812.png)
+
+- 表中显示的是对真实机器和虚拟机的全部100万条应答报文的分析结果。我们计算了真实机器和虚拟机的应答报文中相同IP时间戳重复的平均次数
+- 平均值显示了IP时间戳模式的显著差异
+
+---
+## 结论
+- 真实机器的相同时间戳的平均重复次数几乎为4.50次，而VM目标主机的平均重复值更小。
+- 据此，我们可以确定vm和real machine在IP时间戳行为上存在显著差异。
+- 这些结果支持我们的假设，即由于VM数据包是通过管理程序处理的，因此来自VM环境的应答数据包中会出现时间戳延迟。而且，正如预期的那样，不同的虚拟机监控程序技术具有不同的时间戳行为模式。
+- 因此，可以使用IP时间戳模式远程检测vm
+
+---
+
+## 实践
+
+- The usual ping command uses ECHO REQUEST and ECHO REPLY, as you've seen. It does indeed locally keep track of sent time and matches with the incoming reply to determine the round trip time.
+
+- TIMESTAMP and TIMESTAMP REPLY are pretty rare, and many sites simply don't answer, as many systems managers believe it to be a security issue, albeit minor. The purpose of the packets is to separate out the the times of the outgoing trip, the far end processing time, and the return trip. ICMP in general is subject to all kinds of manipulations and blockages by intervening routers, so it can be hard to read much into the results if you're using this across a network you don't control.
+
+To send them you can use a utility such as nping from the nmap set of tools. It can be used for all kinds of exotic ping-like tests.
+
+- nping --icmp --icmp-type 13 www.google.com
+
+www.google.com won't reply to these, but your packet capture will show them being sent.
+
+---
+## ping IP request 
+![Img](./FILES/test.md/78d8cd03.png)
+
+---
+## nping timestamp request
+![Img](./FILES/test.md/33d913a7.png)
+
+---
+## wireshark info 
+
+![Img](./FILES/test.md/1f65195a.png)
+
+---
+## using nping test my cvm
+![width:800px](./FILES/test.md/b027a076.png)
+
+---
+## using nmap directly
+
+![width:1200px](./FILES/test.md/09d21bb4.png)
+
+
+---
+
+## timestamp 介绍
+
+![Img](./FILES/test.md/d3c3e716.png)
+- Type must be set to 14
+- Code must be set to 0
+- Identifier and Sequence number can be used by the client to match the reply with the request that caused the reply.
+- Originate timestamp is the time the sender last touched the message before sending it.
+- Receive timestamp is the time the echoer first touched it on receipt.
+- Transmit timestamp is the time the echoer last touched the message on sending it.
