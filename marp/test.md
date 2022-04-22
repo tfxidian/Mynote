@@ -177,3 +177,34 @@ www.google.com won't reply to these, but your packet capture will show them bein
 - Originate timestamp is the time the sender last touched the message before sending it.
 - Receive timestamp is the time the echoer first touched it on receipt.
 - Transmit timestamp is the time the echoer last touched the message on sending it.
+
+--- 
+## 发现
+
+Windows下内容比较奇怪
+```
+SENT (0.3230s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=1 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (0.3310s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=1 orig=0 recv=4199265025 trans=4199265025] IP [ttl=128 id=14273 iplen=40 ]
+SENT (1.3310s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=2 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (1.3450s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=2 orig=0 recv=3847205633 trans=3847205633] IP [ttl=128 id=14274 iplen=40 ]
+SENT (2.3360s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=3 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (2.3410s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=3 orig=0 recv=3394482945 trans=3394482945] IP [ttl=128 id=14275 iplen=40 ]
+```
+
+Linux下呈现比较正常
+```
+SENT (0.3230s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=1 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (0.3310s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=1 orig=0 recv=4199265025 trans=4199265025] IP [ttl=128 id=14273 iplen=40 ]
+SENT (1.3310s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=2 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (1.3450s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=2 orig=0 recv=3847205633 trans=3847205633] IP [ttl=128 id=14274 iplen=40 ]
+SENT (2.3360s) ICMP [192.168.152.1 > 192.168.152.134 Timestamp request (type=13/code=0) id=38979 seq=3 orig=0 recv=0 trans=0] IP [ttl=64 id=31675 iplen=40 ]
+RCVD (2.3410s) ICMP [192.168.152.134 > 192.168.152.1 Timestamp reply (type=14/code=0) id=38979 seq=3 orig=0 recv=3394482945 trans=3394482945] IP [ttl=128 id=14275 iplen=40 ]
+```
+
+
+---
+
+## Windows ICMP Timestamp Request Remote Date Disclosure
+The remote host answers to an ICMP timestamp request. This allows an attacker to know the date that is set on the targeted machine, which may assist an unauthenticated, remote attacker in defeating time-based authentication protocols.
+
+Timestamps returned from machines running Windows Vista / 7 / 2008 / 2008 R2 are deliberately incorrect, but usually within 1000 seconds of the actual system time.
